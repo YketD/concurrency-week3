@@ -21,12 +21,8 @@ public class Koper extends Thread
                 System.out.println("[" + getName() + "] Decides to go to HISWA");
                 hiswa.buyerEnterHiswa();
 
-                System.out.println("[" + getName() + "] Is purchasing a boat");
-                buyABoat();
-
+                hiswa.buyBoat();
                 hiswa.leaveHiswa();
-
-                break;
             } catch (InterruptedException e){}
         }
     }
@@ -35,13 +31,6 @@ public class Koper extends Thread
     {
         try {
             Thread.sleep((int)(Math.random() * 30000) + 10000);
-        } catch (InterruptedException e) {}
-    }
-
-    private void buyABoat()
-    {
-        try {
-            Thread.sleep(5000);
         } catch (InterruptedException e) {}
     }
 }

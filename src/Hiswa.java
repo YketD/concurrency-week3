@@ -9,15 +9,15 @@ public class Hiswa
 {
     private static final int MAX_VISITORS = 10;
     private static final int MAX_BUYERS = 4;
-    private int BUYERS_ENTERED = 0;
 
     private int nrOfVisitors = 0;
     private int nrOfBuyers = 0;
-
-    private int amtOfVisitorsWaiting = 0;
+    private int nrOfBuyersInside = 0;
+    private int previousBuyers = 0;
 
     private Condition allowMoreVisitors;
-    private Condition hiswaIsEmpty;
+    private Condition allowMoreBuyers;
+    private Condition noMoreVisitors;
 
     Lock lock;
 
@@ -25,18 +25,25 @@ public class Hiswa
     {
         lock = new ReentrantLock();
         allowMoreVisitors = lock.newCondition();
-        hiswaIsEmpty = lock.newCondition();
+        allowMoreBuyers = lock.newCondition();
+        noMoreVisitors = lock.newCondition();
     }
-
 
     public void buyerEnterHiswa() throws InterruptedException
     {
         lock.lock();
 
         try {
-            System.out.println("[HISWA] A buyer entered, waiting for everyone to leave");
             nrOfBuyers++;
-            hiswaIsEmpty.await();
+
+            while (isBuyerInside())
+                allowMoreBuyers.await();
+
+            System.out.println("[HISWA] A buyer entered, waiting for everyone to leave");
+            nrOfBuyers--;
+            nrOfBuyersInside++;
+            previousBuyers++;
+
         } finally {
             lock.unlock();
         }
@@ -47,13 +54,13 @@ public class Hiswa
         lock.lock();
 
         try {
-            while (hiswaIsFull() || isBuyerWaiting() && BUYERS_ENTERED !=4) {
+            while (hiswaIsFull() || isBuyerWaiting() || isBuyerInside())
                 allowMoreVisitors.await();
-            }
 
             nrOfVisitors++;
-            System.out.println("[HISWA] A visitor entered, total visitors: " + nrOfVisitors);
-
+            System.out.println("[HISWA] A visitor entered, " +
+                    "total visitors: " + nrOfVisitors + ", " +
+                    "total buyers: " + nrOfBuyers);
 
         } finally {
             lock.unlock();
@@ -65,29 +72,40 @@ public class Hiswa
         lock.lock();
 
         try {
-            if (Thread.currentThread() instanceof Kijker){
+            if (Thread.currentThread() instanceof Kijker)
                 nrOfVisitors--;
-                if (nrOfVisitors == 0){hiswaIsEmpty.signal();}
-                System.out.println("[HISWA] " + Thread.currentThread().getName() + " left, remaining visitors: " + nrOfVisitors);
-            }
-            else if (Thread.currentThread() instanceof Koper) {
-                nrOfBuyers--;
-                BUYERS_ENTERED++;
-                System.out.println("[HISWA] " + Thread.currentThread().getName() + " left, amt of buyers visited: " + BUYERS_ENTERED);
-                if (BUYERS_ENTERED == MAX_BUYERS) {
-                    System.out.println("max amt of buyers have bought a boat, letting visitors in");
-                    for (int i = 0 ; i < MAX_VISITORS ; ){
-                        allowMoreVisitors.signal();
-                    }
-                    BUYERS_ENTERED = 0;
-                }   else if(nrOfBuyers > 1){
-                    hiswaIsEmpty.signal();
-                }
+            else if (Thread.currentThread() instanceof Koper)
+                nrOfBuyersInside--;
+
+            if (!isVisitorInside())
+                noMoreVisitors.signal();
+
+            if (isBuyerWaiting() && previousBuyers < MAX_BUYERS)
+                allowMoreBuyers.signal();
+            else
+            {
+                previousBuyers = 0;
+                allowMoreVisitors.signalAll();
             }
 
+            System.out.println("[HISWA] " + Thread.currentThread().getName() + " left, " +
+                    "remaining visitors: " + nrOfVisitors + ", " +
+                    "remaining buyers: " + nrOfBuyers);
 
+        } finally {
+            lock.unlock();
+        }
+    }
 
+    public void buyBoat() throws InterruptedException
+    {
+        lock.lock();
 
+        try {
+            while(isVisitorInside())
+                noMoreVisitors.await();
+
+            System.out.println("[HISWA] " + Thread.currentThread().getName() + " bought a boat");
 
         } finally {
             lock.unlock();
@@ -102,5 +120,15 @@ public class Hiswa
     private boolean isBuyerWaiting()
     {
         return nrOfBuyers > 0;
+    }
+
+    private boolean isBuyerInside()
+    {
+        return nrOfBuyersInside > 0;
+    }
+
+    private boolean isVisitorInside()
+    {
+        return nrOfVisitors > 0;
     }
 }

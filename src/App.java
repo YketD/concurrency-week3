@@ -3,8 +3,8 @@
  */
 public class App
 {
-    private static final int VISITOR_POPULATION = 15;
-    private static final int BUYER_POPULATION = 8;
+    private static final int VISITOR_POPULATION = 2; //15
+    private static final int BUYER_POPULATION = 4; //8
 
     public static void main(String[] args)
     {

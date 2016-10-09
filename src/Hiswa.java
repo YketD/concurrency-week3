@@ -45,8 +45,9 @@ public class Hiswa
         lock.lock();
 
         try {
-            while (hiswaIsFull() || isBuyerWaiting())
-                allowMoreVisitors.await();
+            while (hiswaIsFull())
+                if (!isBuyerWaiting())
+                    allowMoreVisitors.await();
 
             nrOfVisitors++;
             System.out.println("[HISWA] A visitor entered, total visitors: " + nrOfVisitors);
@@ -65,11 +66,14 @@ public class Hiswa
             if (Thread.currentThread() instanceof Kijker){
                 nrOfVisitors--;
                 if (nrOfVisitors == 0){hiswaIsEmpty.signal();}
+                System.out.println("[HISWA] " + Thread.currentThread().getName() + " left, remaining visitors: " + nrOfVisitors);
             }
             else if (Thread.currentThread() instanceof Koper) {
                 nrOfBuyers--;
                 BUYERS_ENTERED++;
+                System.out.println("[HISWA] " + Thread.currentThread().getName() + " left, amt of buyers visited: " + BUYERS_ENTERED);
                 if (BUYERS_ENTERED == MAX_BUYERS) {
+                    System.out.println("max amt of buyers have bought a boat, letting visitors in");
                     allowMoreVisitors.signalAll();
                     BUYERS_ENTERED = 0;
                 }   else if(nrOfBuyers > 1){
@@ -78,12 +82,8 @@ public class Hiswa
             }
 
 
-            if (!isBuyerWaiting())
-                allowMoreVisitors.signalAll();
 
 
-
-            System.out.println("[HISWA] " + Thread.currentThread().getName() + " left, remaining visitors: " + nrOfVisitors);
 
         } finally {
             lock.unlock();

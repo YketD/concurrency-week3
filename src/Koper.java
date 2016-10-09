@@ -34,14 +34,14 @@ public class Koper extends Thread
     private void justLive()
     {
         try {
-            Thread.sleep((int)(Math.random() * 60000) + 10000);
+            Thread.sleep((int)(Math.random() * 30000) + 10000);
         } catch (InterruptedException e) {}
     }
 
     private void buyABoat()
     {
         try {
-            Thread.sleep(20000);
+            Thread.sleep(5000);
         } catch (InterruptedException e) {}
     }
 }

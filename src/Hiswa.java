@@ -14,6 +14,8 @@ public class Hiswa
     private int nrOfVisitors = 0;
     private int nrOfBuyers = 0;
 
+    private int amtOfVisitorsWaiting = 0;
+
     private Condition allowMoreVisitors;
     private Condition hiswaIsEmpty;
 
@@ -45,9 +47,9 @@ public class Hiswa
         lock.lock();
 
         try {
-            while (hiswaIsFull())
-                if (!isBuyerWaiting())
-                    allowMoreVisitors.await();
+            while (hiswaIsFull() || isBuyerWaiting() && BUYERS_ENTERED !=4) {
+                allowMoreVisitors.await();
+            }
 
             nrOfVisitors++;
             System.out.println("[HISWA] A visitor entered, total visitors: " + nrOfVisitors);
@@ -74,7 +76,9 @@ public class Hiswa
                 System.out.println("[HISWA] " + Thread.currentThread().getName() + " left, amt of buyers visited: " + BUYERS_ENTERED);
                 if (BUYERS_ENTERED == MAX_BUYERS) {
                     System.out.println("max amt of buyers have bought a boat, letting visitors in");
-                    allowMoreVisitors.signalAll();
+                    for (int i = 0 ; i < MAX_VISITORS ; ){
+                        allowMoreVisitors.signal();
+                    }
                     BUYERS_ENTERED = 0;
                 }   else if(nrOfBuyers > 1){
                     hiswaIsEmpty.signal();

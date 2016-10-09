@@ -1,38 +1,47 @@
 /**
  * Created by yketd on 29-9-2016.
  */
-public class Koper extends Thread {
-    boolean koperEntered = false;
+public class Koper extends Thread
+{
+    private Hiswa hiswa;
 
-    Hiswa hiswa;
-
-    public Koper(Hiswa hiswa){
+    public Koper(String name, Hiswa hiswa)
+    {
+        super(name);
         this.hiswa = hiswa;
     }
 
-    public void run() {
-        while (true){
-            justLive();
-            hiswa.enter(250000);
-            koop();
-            hiswa.koperLeaves();
+    @Override
+    public void run()
+    {
+        while (true) {
+            try{
+                justLive();
+
+                System.out.println("[" + getName() + "] Decides to go to HISWA");
+                hiswa.buyerEnterHiswa();
+
+                System.out.println("[" + getName() + "] Is purchasing a boat");
+                buyABoat();
+
+                hiswa.leaveHiswa();
+
+                break;
+            } catch (InterruptedException e){}
         }
     }
 
-    public void justLive(){
+    private void justLive()
+    {
         try {
-            Thread.sleep((int) (Math.random() * 2000));
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+            Thread.sleep((int)(Math.random() * 60000) + 10000);
+        } catch (InterruptedException e) {}
     }
 
-    public void koop(){
+    private void buyABoat()
+    {
         try {
-            Thread.sleep((int) (Math.random() * 2000));
-            System.out.println("gekocht");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+            Thread.sleep(20000);
+        } catch (InterruptedException e) {}
     }
 }

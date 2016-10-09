@@ -1,40 +1,46 @@
 /**
  * Created by yketd on 29-9-2016.
  */
-public class Kijker extends Thread {
-    boolean kijkerEntered = false;
+public class Kijker extends Thread
+{
+    private Hiswa hiswa;
 
-    Hiswa hiswa;
-
-    public Kijker(Hiswa hiswa){
+    public Kijker(String name, Hiswa hiswa)
+    {
+        super(name);
         this.hiswa = hiswa;
     }
 
-    public void run(){
-        while(true) {
-            justLive();
-            hiswa.enter(10);
-            kijk();
-            hiswa.leave();
+    @Override
+    public void run()
+    {
+        while (true) {
+            try{
+                justLive();
+
+                System.out.println("[" + getName() + "] Decides to go to HISWA");
+                hiswa.enterHiswa();
+                Thread.sleep(1000);
+
+                System.out.println("[" + getName() + "] Is looking at boats");
+                lookAtBoats();
+
+                hiswa.leaveHiswa();
+            } catch (InterruptedException e){}
         }
     }
 
-    public void justLive(){
+    private void justLive()
+    {
         try {
-            Thread.sleep((int) (Math.random() * 2000));
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+            Thread.sleep((int)(Math.random() * 10000));
+        } catch (InterruptedException e) {}
     }
 
-    public void kijk(){
+    private void lookAtBoats()
+    {
         try {
-            Thread.sleep((int) (Math.random() * 2000));
-            System.out.println("gekeken");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } finally{
-            hiswa.leave();
-        }
+            Thread.sleep((int)(Math.random() * 20000));
+        } catch (InterruptedException e) {}
     }
 }

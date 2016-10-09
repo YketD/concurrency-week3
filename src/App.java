@@ -1,31 +1,31 @@
 /**
  * Created by yketd on 29-9-2016.
  */
-public class App {
-    static int KOPER_AMT = 8;
-    static int KIJKER_AMT = 20;
-    public static void main(String[] args) {
-        new App().run();
-    }
-    Thread koper[];
-    Thread kijker[];
-    Hiswa hiswa;
+public class App
+{
+    private static final int VISITOR_POPULATION = 15;
+    private static final int BUYER_POPULATION = 8;
 
+    public static void main(String[] args)
+    {
+        System.out.println("Initializing HISWA");
 
-    public void run(){
-        koper = new Thread[KOPER_AMT];
-        kijker = new Thread[KIJKER_AMT];
-        hiswa = new Hiswa();
-        hiswa.start();
+        Hiswa hiswa = new Hiswa();
+        Thread[] kijker = new Thread[VISITOR_POPULATION];
+        Thread[] koper = new Thread[BUYER_POPULATION];
 
-        for (int i = 0; i < KOPER_AMT ; i++){
-            koper[i] = new Koper(hiswa);
-            koper[i].start();
+        System.out.println("Starting threads");
+
+        for(int i = 0; i < VISITOR_POPULATION; i++)
+        {
+            kijker[i] = new Kijker("Visitor " + i, hiswa);
+            kijker[i].start();
         }
 
-        for (int i = 0; i < KIJKER_AMT ; i++){
-            kijker[i] = new Kijker(hiswa);
-            kijker[i].start();
+        for(int i = 0; i < BUYER_POPULATION; i++)
+        {
+            koper[i] = new Koper("Buyer " + i, hiswa);
+            koper[i].start();
         }
     }
 }

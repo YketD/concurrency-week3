@@ -18,13 +18,16 @@ public class Kijker extends Thread
             try{
                 justLive();
 
+                // Let's get the visitor waiting
                 System.out.println("[" + getName() + "] Decides to go to HISWA");
                 hiswa.enterHiswa();
                 Thread.sleep(1000);
 
+                // Give visitor some time to look at boats
                 System.out.println("[" + getName() + "] Is looking at boats");
                 lookAtBoats();
 
+                // Let him leave
                 hiswa.leaveHiswa();
             } catch (InterruptedException e){}
         }

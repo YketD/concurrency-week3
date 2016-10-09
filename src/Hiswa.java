@@ -19,7 +19,7 @@ public class Hiswa
     private Condition allowMoreBuyers;
     private Condition noMoreVisitors;
 
-    Lock lock;
+    private Lock lock;
 
     public Hiswa()
     {
@@ -34,8 +34,10 @@ public class Hiswa
         lock.lock();
 
         try {
+            // Remember how many buyers we have waiting
             nrOfBuyers++;
 
+            // Only allow one buyer at a time
             while (isBuyerInside())
                 allowMoreBuyers.await();
 
@@ -54,6 +56,7 @@ public class Hiswa
         lock.lock();
 
         try {
+            // Only let visitor in on the following three conditions
             while (hiswaIsFull() || isBuyerWaiting() || isBuyerInside())
                 allowMoreVisitors.await();
 
@@ -72,18 +75,22 @@ public class Hiswa
         lock.lock();
 
         try {
+            // Register the departure of either a visitor or buyer
             if (Thread.currentThread() instanceof Kijker)
                 nrOfVisitors--;
             else if (Thread.currentThread() instanceof Koper)
                 nrOfBuyersInside--;
 
+            // Let any buyer inside HISWA know he's alone, ready for any purchases
             if (!isVisitorInside())
                 noMoreVisitors.signal();
 
+            // Continue letting in buyers, as long we didn't exceed the max. in a row
             if (isBuyerWaiting() && previousBuyers < MAX_BUYERS)
                 allowMoreBuyers.signal();
             else
             {
+                // No more buyers waiting, let the max. amount of visitors in
                 previousBuyers = 0;
                 allowMoreVisitors.signalAll();
             }
@@ -102,6 +109,7 @@ public class Hiswa
         lock.lock();
 
         try {
+            // Don't let the visitors know the transaction price, wait till they're out
             while(isVisitorInside())
                 noMoreVisitors.await();
 

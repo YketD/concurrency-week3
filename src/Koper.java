@@ -17,12 +17,17 @@ public class Koper extends Thread
         while (true) {
             try{
                 justLive();
-
                 System.out.println("[" + getName() + "] Decides to go to HISWA");
+
+                // I came
                 hiswa.buyerEnterHiswa();
 
+                // I saw
                 hiswa.buyBoat();
+
+                // I conquered
                 hiswa.leaveHiswa();
+
             } catch (InterruptedException e){}
         }
     }
